@@ -1,4 +1,4 @@
-RegisterCommand("setweather", function(source, args, rawCommand)
+RegisterCommand("setweather", function(_, args)
     local weatherType = args[1] or "clear"
 
     local correctWeatherTypes = {
