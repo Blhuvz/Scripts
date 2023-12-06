@@ -1,5 +1,11 @@
 RegisterCommand('revive', function(source, args)
-    local playerId = args[1] or source
+
+    if args[1]:lower() == 'me' then
+        playerId = source
+    else
+        playerId = tonumber(args[1])
+    end
+    
     local playerPed = GetPlayerPed(-1)
 
     if not playerId then
@@ -29,7 +35,12 @@ end, false)
 
 
 RegisterCommand('heal', function(source, args)
-    local playerId = args[1] or source
+    if args[1]:lower() == 'me' then
+        playerId = source
+    else
+        playerId = tonumber(args[1])
+    end
+
     local playerPed = GetPlayerPed(-1)
 
     if not playerId then
@@ -48,8 +59,15 @@ RegisterCommand('heal', function(source, args)
             SetEntityHealth(playerPed, maxHealth)
 
             TriggerEvent('chat:addMessage', {
-                color = {52, 128, 235},
+                color = {17, 186, 65},
                 args = {'Healing player...'}
+            })
+
+            Wait(500)
+
+            TriggerEvent('chat:addMessage', {
+                color = {11, 8, 201},
+                args = {'Player Successfully Healed!'}
             })
         else
             TriggerEvent('chat:addMessage', {
