@@ -32,7 +32,7 @@ RegisterCommand('teleport', function(_, args)
     else        
         TriggerEvent('chat:addMessage', {
             color = {255, 0, 0},
-            args = {'No destination set on the map!'}
+            args = {'No waypoint set on the map!'}
         })
     end
 end, false)
