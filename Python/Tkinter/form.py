@@ -4,7 +4,6 @@ from tkinter import *
 from tkinter import messagebox
 import random
 
-
 def submit_data():
     accepted = accept_var.get()
 
