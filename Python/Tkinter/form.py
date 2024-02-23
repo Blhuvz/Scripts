@@ -1,8 +1,30 @@
-# First GUI Project. 
+# First GUI Project Using SQL
 
 from tkinter import *
 from tkinter import messagebox
 import random
+import sqlite3
+
+# Function to insert data into database
+def insert_data_to_database(name, address, gender, dob, patient_phone_number, next_of_kin, next_of_kin_phone, allergies, patient_number):
+    conn = sqlite3.connect('hospital_database.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Patients (
+                        patient_number INTEGER PRIMARY KEY,
+                        name TEXT,
+                        address TEXT,
+                        gender TEXT,
+                        dob TEXT,
+                        patient_phone_number TEXT,
+                        next_of_kin TEXT,
+                        next_of_kin_phone TEXT,
+                        allergies TEXT
+                    )''')
+    cursor.execute('''INSERT INTO Patients (name, address, gender, dob, patient_phone_number, next_of_kin, next_of_kin_phone, allergies, patient_number)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                    (name, address, gender, dob, patient_phone_number, next_of_kin, next_of_kin_phone, allergies, patient_number))
+    conn.commit()
+    conn.close()
 
 def submit_data():
     accepted = accept_var.get()
@@ -23,6 +45,9 @@ def submit_data():
 
         if name and address and gender and dob and patient_phone_number and next_of_kin and next_of_kin_phone:
             messagebox.showinfo(title="Submission Successful", message=f"Thank you {name}! Your patient number is {patient_number}.")
+
+            # Insert data into database
+            insert_data_to_database(name, address, gender, dob, patient_phone_number, next_of_kin, next_of_kin_phone, allergies, patient_number)
 
             print("------------------------------------------")
             print("Name:", name)
