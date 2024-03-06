@@ -56,7 +56,7 @@ def submit_data():
     allergies = allergies_entry.get("1.0", "end-1c")
 
 
-     # Error checking
+     # Error Handling
     if not name and not name.isalpha():
         messagebox.showerror("Error", "Please enter a valid name.")
         return
