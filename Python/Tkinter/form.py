@@ -1,4 +1,4 @@
-# First GUI Project Using SQL
+# GUI Project Using SQL
 
 from tkinter import *
 from tkinter import messagebox, simpledialog
