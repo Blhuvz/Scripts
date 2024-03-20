@@ -7,11 +7,10 @@ def create_database():
     cursor = newDB.cursor()
 
     sql_query = '''CREATE TABLE IF NOT EXISTS Movies
-    (movie_name text,
-    date text,
-    genre text,
-    rating text)
-    '''
+    (movie_name TEXT,
+    date TEXT,
+    genre TEXT,
+    rating TEXT)'''
    
     cursor.execute(sql_query)
 
@@ -24,6 +23,7 @@ def create_database():
 def data_validation(result):
     valid_options = ['1', '2', '3', '4', '5']
     return result in valid_options
+
 
 
 # Options
