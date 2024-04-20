@@ -32,6 +32,7 @@ RegisterCommand('fixvehicle', function(_, args)
     end
 end, false)
 
+TriggerEvent('chat:addSuggestion', '/fixvehicle', 'Command to fix your vehicle')
 
 
 -- Angry ped
@@ -83,6 +84,7 @@ RegisterCommand('angryped', function(_, args)
     })
 end, false)
 
+TriggerEvent('chat:addSuggestion', '/angryped', 'Command to spawn an angry local')
 
 
 -- Health Scripts
@@ -96,13 +98,12 @@ CreateThread(function()
     while true do
         local ped = GetPlayerPed(-1)
         local health = GetEntityHealth(ped)
-        local isDead = IsEntityDead(ped)
 
         if tonumber(health) < 200 then
-            showText("Looks like your injured! Use [/heal] to regain your health/armour", 10000)
+            showText("Looks like your injured! Use [/heal] to regain your health/armour", 1000)
             
-        elseif isDead then
-            showText("Looks like your character is incapacitated! Use [/revive] or [/respawn] to revive yourself or respawn at hospital.", 10000)
+        elseif health == 0 then
+            showText("Looks like your character is incapacitated! Use [/revive] or [/respawn] to revive yourself or respawn at hospital.", 1000)
         end
 
         Wait(1000)
@@ -149,6 +150,10 @@ RegisterCommand('revive', function(source, args)
         })
     end
 end, false)
+
+TriggerEvent('chat:addSuggestion', '/revive', 'Command to revive a player', {
+    { name="Player ID", help="The ID of the player your wanting to revive" }
+})
 
 
 
@@ -202,6 +207,12 @@ RegisterCommand('heal', function(source, args)
     end
 end, false)
 
+TriggerEvent('chat:addSuggestion', '/heal', 'Command to heal a player', {
+    { name="Player ID", help="The player ID of the player you want to heal" }
+})
+
+
+
 -- Respawn
 local hospitals = {
     {coords = vector3(298.66693, -584.3158, 43.260841), heading = 68.6855, name = "Pillbox Hospital"},
@@ -233,6 +244,9 @@ RegisterCommand("respawn", function()
         })
     end
 end, false)
+
+TriggerEvent('chat:addSuggestion', '/respawn', 'Command to respawn')
+
 
 -- Kill Ped 
 RegisterCommand('kill', function(source, args)
@@ -274,7 +288,9 @@ RegisterCommand('kill', function(source, args)
     end
 end, false)
 
-
+TriggerEvent('chat:addSuggestion', '/kill', 'Command to kill a player', {
+    { name="Player ID", help="The player ID of the player you want to kill" }
+})
 
 
 -- Teleport Command
@@ -317,171 +333,167 @@ RegisterCommand('teleport', function(_, args)
     end
 end, false)
 
+TriggerEvent('chat:addSuggestion', '/teleport', 'Command to teleport to a waypoint')
+
 
 
 -- Weapons Script
 RegisterCommand("weapon", function(_, args)
     local weaponName = args[1]
-    local myPed = GetPlayerPed(-1)
 
     if not weaponName then
         TriggerEvent('chat:addMessage', {
             color = {255, 0, 0},
-            args = { "Invalid Input, Example usaage: /gun [weapon]" }
+            args = { "Invalid Input, Example usage: /weapon [weapon]" }
         })
-        return
-    end
-
-    if IsWeaponValid(weaponName) then
-        local weaponHash = GetHashKey(weaponName)
-
-        if HasPedGotWeapon(myPed, weaponHash, false) then
-            TriggerEvent('chat:addMessage', {
-                color = {255, 0, 0},
-                args = { "You already have a " .. weaponName }
-            })
-        else
-            RequestWeaponAsset(weaponHash)
-
-            while not HasWeaponAssetLoaded(weaponHash) do
-                Wait(500)
-            end
-
-            GiveWeaponToPed(myPed, weaponHash, 1000, false, true) 
-
-            TriggerEvent('chat:addMessage', {
-                color = {52, 128, 235},
-                args = { "You received a " .. weaponName }
-            })
-        end
     else
-        TriggerEvent('chat:addMessage', {
-            color = {255, 0, 0},
-            args = { weaponName .. " is not a valid weapon" }
-        })
+        weaponHandling(weaponName)
     end
 end, false)
 
-function IsWeaponValid(weaponName)
-    local validWeapons = {
-        "WEAPON_DAGGER",
-        "WEAPON_BAT",
-        "WEAPON_BOTTLE",
-        "WEAPON_CROWBAR",
-        "WEAPON_UNARMED",
-        "WEAPON_FLASHLIGHT",
-        "WEAPON_GOLFCLUB",
-        "WEAPON_HAMMER",
-        "WEAPON_HATCHET",
-        "WEAPON_KNUCKLE",
-        "WEAPON_KNIFE",
-        "WEAPON_MACHETE",
-        "WEAPON_SWITCHBLADE",
-        "WEAPON_NIGHTSTICK",
-        "WEAPON_WRENCH",
-        "WEAPON_BATTLEAXE",
-        "WEAPON_POOLCUE",
-        "WEAPON_STONE_HATCHET",
-        "WEAPON_PISTOL",
-        "WEAPON_PISTOL_MK2",
-        "WEAPON_COMBATPISTOL",
-        "WEAPON_APPISTOL",
-        "WEAPON_STUNGUN",
-        "WEAPON_PISTOL50",
-        "WEAPON_SNSPISTOL",
-        "WEAPON_SNSPISTOL_MK2",
-        "WEAPON_HEAVYPISTOL",
-        "WEAPON_VINTAGEPISTOL",
-        "WEAPON_FLAREGUN",
-        "WEAPON_MARKSMANPISTOL",
-        "WEAPON_REVOLVER",
-        "WEAPON_REVOLVER_MK2",
-        "WEAPON_DOUBLEACTION",
-        "WEAPON_RAYPISTOL",
-        "WEAPON_CERAMICPISTOL",
-        "WEAPON_NAVYREVOLVER",
-        "WEAPON_MICROSMG",
-        "WEAPON_SMG",
-        "WEAPON_SMG_MK2",
-        "WEAPON_ASSAULTSMG",
-        "WEAPON_COMBATPDW",
-        "WEAPON_MACHINEPISTOL",
-        "WEAPON_MINISMG",
-        "WEAPON_RAYCARBINE",
-        "WEAPON_PUMPSHOTGUN",
-        "WEAPON_PUMPSHOTGUN_MK2",
-        "WEAPON_SAWNOFFSHOTGUN",
-        "WEAPON_ASSAULTSHOTGUN",
-        "WEAPON_BULLPUPSHOTGUN",
-        "WEAPON_MUSKET",
-        "WEAPON_HEAVYSHOTGUN",
-        "WEAPON_DBSHOTGUN",
-        "WEAPON_AUTOSHOTGUN",
-        "WEAPON_ASSAULTRIFLE",
-        "WEAPON_ASSAULTRIFLE_MK2",
-        "WEAPON_CARBINERIFLE",
-        "WEAPON_CARBINERIFLE_MK2",
-        "WEAPON_ADVANCEDRIFLE",
-        "WEAPON_SPECIALCARBINE",
-        "WEAPON_SPECIALCARBINE_MK2",
-        "WEAPON_BULLPUPRIFLE",
-        "WEAPON_BULLPUPRIFLE_MK2",
-        "WEAPON_COMPACTRIFLE",
-        "WEAPON_MG",
-        "WEAPON_COMBATMG",
-        "WEAPON_COMBATMG_MK2",
-        "WEAPON_GUSENBERG",
-        "WEAPON_SNIPERRIFLE",
-        "WEAPON_HEAVYSNIPER",
-        "WEAPON_HEAVYSNIPER_MK2",
-        "WEAPON_MARKSMANRIFLE",
-        "WEAPON_MARKSMANRIFLE_MK2",
-        "WEAPON_RPG",
-        "WEAPON_GRENADELAUNCHER",
-        "WEAPON_GRENADELAUNCHER_SMOKE",
-        "WEAPON_MINIGUN",
-        "WEAPON_FIREWORK",
-        "WEAPON_RAILGUN",
-        "WEAPON_HOMINGLAUNCHER",
-        "WEAPON_COMPACTLAUNCHER",
-        "WEAPON_RAYMINIGUN",
-        "WEAPON_GRENADE",
-        "WEAPON_BZGAS",
-        "WEAPON_SMOKEGRENADE",
-        "WEAPON_FLARE",
-        "WEAPON_MOLOTOV",
-        "WEAPON_STICKYBOMB",
-        "WEAPON_PROXMINE",
-        "WEAPON_SNOWBALL",
-        "WEAPON_PIPEBOMB",
-        "WEAPON_BALL",
-        "WEAPON_PETROLCAN",
-        "WEAPON_FIREEXTINGUISHER",
-        "WEAPON_PARACHUTE",
-        "WEAPON_HAZARDCAN"
-    }
+
+local validWeapons = {
+    {hash = "WEAPON_DAGGER", callName = "dagger" },
+    {hash = "WEAPON_BAT", callName = "bat"},
+    {hash = "WEAPON_BOTTLE", callName = "bottle"},
+    {hash = "WEAPON_CROWBAR", callName = "crowbar"},
+    {hash = "WEAPON_UNARMED", callName = "unarmed"},
+    {hash = "WEAPON_FLASHLIGHT", callName = "flashlight"},
+    {hash = "WEAPON_GOLFCLUB", callName = "golfclub"},
+    {hash = "WEAPON_HAMMER", callName = "hammer"},
+    {hash = "WEAPON_HATCHET", callName = "hatchet"},
+    {hash = "WEAPON_KNUCKLE", callName = "knuckleduster"},
+    {hash = "WEAPON_KNIFE", callName = "knife"},
+    {hash = "WEAPON_MACHETE", callName = "machete"},
+    {hash = "WEAPON_SWITCHBLADE", callName = "switchblade"},
+    {hash = "WEAPON_NIGHTSTICK", callName = "nightstick"},
+    {hash = "WEAPON_WRENCH", callName = "wrench"},
+    {hash = "WEAPON_BATTLEAXE", callName = "battleaxe"},
+    {hash = "WEAPON_POOLCUE", callName = "poolcue"},
+    {hash = "WEAPON_STONE_HATCHET", callName = "hatchet"},
+    {hash = "WEAPON_PISTOL", callName = "pistol"},
+    {hash = "WEAPON_PISTOL_MK2", callName = "pistolmk2"},
+    {hash = "WEAPON_COMBATPISTOL", callName = "combatpistol"},
+    {hash = "WEAPON_APPISTOL", callName = "appistol"},
+    {hash = "WEAPON_STUNGUN", callName = "taser"},
+    {hash = "WEAPON_PISTOL50", callName = "pistol50"},
+    {hash = "WEAPON_SNSPISTOL", callName = "snspistol"},
+    {hash = "WEAPON_SNSPISTOL_MK2", callName = "snspistolmk2"},
+    {hash = "WEAPON_HEAVYPISTOL", callName = "heavypistol"},
+    {hash = "WEAPON_VINTAGEPISTOL", callName = "vintagepistol"},
+    {hash = "WEAPON_FLAREGUN", callName = "flaregun"},
+    {hash = "WEAPON_MARKSMANPISTOL", callName = "marksmanpistol"},
+    {hash = "WEAPON_REVOLVER", callName = "revolver"},
+    {hash = "WEAPON_REVOLVER_MK2", callName = "revolvermk2"},
+    {hash = "WEAPON_DOUBLEACTION", callName = "doubleaction"},
+    {hash = "WEAPON_RAYPISTOL", callName = "raypistol"},
+    {hash = "WEAPON_CERAMICPISTOL", callName = "ceramicpistol"},
+    {hash = "WEAPON_NAVYREVOLVER", callName = "navyrevolver"},
+    {hash = "WEAPON_MICROSMG", callName = "microsmg"},
+    {hash = "WEAPON_SMG", callName = "smg"},
+    {hash = "WEAPON_SMG_MK2", callName = "smgmk2"},
+    {hash = "WEAPON_ASSAULTSMG", callName = "assaultsmg"},
+    {hash = "WEAPON_COMBATPDW", callName = "combatpdw"},
+    {hash = "WEAPON_MACHINEPISTOL", callName = "machinepistol"},
+    {hash = "WEAPON_MINISMG", callName = "minismg"},
+    {hash = "WEAPON_RAYCARBINE", callName = "raycarbine"},
+    {hash = "WEAPON_PUMPSHOTGUN", callName = "pumpshotgun"},
+    {hash = "WEAPON_PUMPSHOTGUN_MK2", callName = "pumpshotgunmk2"},
+    {hash = "WEAPON_SAWNOFFSHOTGUN", callName = "sawnoffshotgun"},
+    {hash = "WEAPON_ASSAULTSHOTGUN", callName = "assaultshotgun"},
+    {hash = "WEAPON_BULLPUPSHOTGUN", callName = "bullpupshotgun"},
+    {hash = "WEAPON_MUSKET", callName = "musket"},
+    {hash = "WEAPON_HEAVYSHOTGUN", callName = "heavyshotgun"},
+    {hash = "WEAPON_DBSHOTGUN", callName = "dbshotgun"},
+    {hash = "WEAPON_AUTOSHOTGUN", callName = "autoshotgun"},
+    {hash = "WEAPON_ASSAULTRIFLE", callName = "assaultrifle"},
+    {hash = "WEAPON_ASSAULTRIFLE_MK2", callName = "assaultriflemk2"},
+    {hash = "WEAPON_CARBINERIFLE", callName = "carbinerifle"},
+    {hash = "WEAPON_CARBINERIFLE_MK2", callName = "carbineriflemk2"},
+    {hash = "WEAPON_ADVANCEDRIFLE", callName = "advancedrifle"},
+    {hash = "WEAPON_SPECIALCARBINE", callName = "specialcarbine"},
+    {hash = "WEAPON_SPECIALCARBINE_MK2", callName = "specialcarbinemk2"},
+    {hash = "WEAPON_BULLPUPRIFLE", callName = "bullpuprifle"},
+    {hash = "WEAPON_BULLPUPRIFLE_MK2", callName = "bullpupriflemk2"},
+    {hash = "WEAPON_COMPACTRIFLE", callName = "compactrifle"},
+    {hash = "WEAPON_MG", callName = "mg"},
+    {hash = "WEAPON_COMBATMG", callName = "combatmg"},
+    {hash = "WEAPON_COMBATMG_MK2", callName = "combatmgmk2"},
+    {hash = "WEAPON_GUSENBERG", callName = "gusenberg"},
+    {hash = "WEAPON_SNIPERRIFLE", callName = "sniperrifle"},
+    {hash = "WEAPON_HEAVYSNIPER", callName = "heavysniper"},
+    {hash = "WEAPON_HEAVYSNIPER_MK2", callName = "heavysnipermk2"},
+    {hash = "WEAPON_MARKSMANRIFLE", callName = "marksmanrifle"},
+    {hash = "WEAPON_MARKSMANRIFLE_MK2", callName = "marksmanriflemk2"},
+    {hash = "WEAPON_RPG", callName = "rpg"},
+    {hash = "WEAPON_GRENADELAUNCHER", callName = "grenadelauncher"},
+    {hash = "WEAPON_GRENADELAUNCHER_SMOKE", callName = "grenadelaunchersmoke"},
+    {hash = "WEAPON_MINIGUN", callName = "minigun"},
+    {hash = "WEAPON_FIREWORK", callName = "firework"},
+    {hash = "WEAPON_RAILGUN", callName = "railgun"},
+    {hash = "WEAPON_HOMINGLAUNCHER", callName = "hominglauncher"},
+    {hash = "WEAPON_COMPACTLAUNCHER", callName = "compactlauncher"},
+    {hash = "WEAPON_RAYMINIGUN", callName = "rayminigun"},
+    {hash = "WEAPON_GRENADE", callName = "grenade"},
+    {hash = "WEAPON_BZGAS", callName = "bzgas"},
+    {hash = "WEAPON_SMOKEGRENADE", callName = "smokegrenade"},
+    {hash = "WEAPON_FLARE", callName = "flare"},
+    {hash = "WEAPON_MOLOTOV", callName = "molotov"},
+    {hash = "WEAPON_STICKYBOMB", callName = "stickybomb"},
+    {hash = "WEAPON_PROXMINE", callName = "proxmine"},
+    {hash = "WEAPON_SNOWBALL", callName = "snowball"},
+    {hash = "WEAPON_PIPEBOMB", callName = "pipebomb"},
+    {hash = "WEAPON_BALL", callName = "ball"},
+    {hash = "WEAPON_PETROLCAN", callName = "petrolcan"},
+    {hash = "WEAPON_FIREEXTINGUISHER", callName = "fireextinguisher"},
+    {hash = "WEAPON_PARACHUTE", callName = "parachute"},
+    {hash = "WEAPON_HAZARDCAN", callName = "hazardcan"}
+}
+
+
+function weaponHandling(weaponName)
+    local myPed = GetPlayerPed(-1)
 
     for _, validWeapon in ipairs(validWeapons) do
-        if weaponName == validWeapon then
-            return true
+        if string.lower(weaponName) == string.lower(validWeapon.callName) then
+            local weaponHash = GetHashKey(validWeapon.hash)
+
+            if HasPedGotWeapon(myPed, weaponHash, false) then
+                TriggerEvent('chat:addMessage', {
+                    color = {255, 0, 0},
+                    args = { "You already have a " .. weaponName }
+                })
+                return
+            else
+                RequestWeaponAsset(weaponHash)
+              
+                while not HasWeaponAssetLoaded(weaponHash) do
+                    Wait(500)
+                end
+    
+                GiveWeaponToPed(myPed, weaponHash, 1000, false, true)
+                TriggerEvent('chat:addMessage', {
+                    color = {52, 128, 235},
+                    args = { "You received a " .. weaponName }
+                })
+                return
+            end
         end
     end
 
-    return false
+    TriggerEvent('chat:addMessage', {
+        color = {255, 0, 0},
+        args = { weaponName .. " is not a valid weapon" }
+    })
 end
+
+TriggerEvent('chat:addSuggestion', '/weapon', 'Command to spawn a weapon', {
+    { name="weapon name", help="The name of the weapon your wanting to spawn" }
+})
 
 
 
 -- Weather Scripts 
-function contains(tbl, value)
-    for _, v in ipairs(tbl) do
-        if v == value then
-            return true
-        end
-    end
-    return false
-end
-
 RegisterCommand("setweather", function(_, args)
     local weatherType = args[1] or "clear"
 
@@ -522,11 +534,21 @@ RegisterCommand("setweather", function(_, args)
     end
 end, false)
 
+function contains(tbl, value)
+    for _, v in ipairs(tbl) do
+        if v == value then
+            return true
+        end
+    end
+    return false
+end
+
+TriggerEvent('chat:addSuggestion', '/setweather', 'Command to set the weather')
 
 
 -- Car Spawner
-RegisterCommand('vehicle', function(source, args)
-    local vehicleName = args[1] or 'adder'
+RegisterCommand('vehicle', function(_, args)
+    local vehicleName = args[1] or 'tornado'
 
     if not IsModelInCdimage(vehicleName) or not IsModelAVehicle(vehicleName) then
         TriggerEvent('chat:addMessage', {
@@ -538,7 +560,7 @@ RegisterCommand('vehicle', function(source, args)
 
     RequestModel(vehicleName)
 
-    Citizen.CreateThread(function()
+    CreateThread(function()
         local timeout = 10
         local start = GetGameTimer()
 
@@ -575,3 +597,7 @@ RegisterCommand('vehicle', function(source, args)
         end
     end)
 end, false)
+
+TriggerEvent('chat:addSuggestion', '/vehicle', 'Command to spawn a vehicle', {
+    { name="vehicle", help="The name of the vehicle you are wanting to spawn" }
+})
