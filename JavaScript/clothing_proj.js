@@ -49,7 +49,7 @@ function updateClothing() {
 
 function getNextAvailableRow(sheetRange) {
   var values = sheetRange.getValues();
-  for (var i = 0; i < values.length; i++) {
+  for (let i = 0; i < values.length; i++) {
     var row = values[i];
     if (row.every(function(cell) {
       return cell === "";
