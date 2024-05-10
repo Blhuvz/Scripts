@@ -22,13 +22,13 @@ function addClothing() {
 
 
 function updateClothing() {
-  let clothing = ui.prompt("Enter the name of the clothing you want to update: ");
-  let userInput = clothing.getResponseText();
+  var clothing = ui.prompt("Enter the name of the clothing you want to update: ");
+  var userInput = clothing.getResponseText();
 
-  let requestedValue = ui.prompt("Enter the name of the new piece of clothing: ");
-  let requestedInput = requestedValue.getResponseText();
+  var requestedValue = ui.prompt("Enter the name of the new piece of clothing: ");
+  var requestedInput = requestedValue.getResponseText();
 
-  let clothingExists = false;
+  var clothingExists = false;
 
   for (let i = 0; i < databaseNames.length; i++) {
     if (databaseNames[i][0] === userInput && userInput != "" && requestedInput != "") {
